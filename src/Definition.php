@@ -43,11 +43,26 @@ class Definition implements EncodableInterface
      */
     public function reflectParse(array $parse_result): Definition
     {
-        if (! is_array(current($parse_result))) {
+        //An error is reported when the class is commented
+        /*if (! is_array(current($parse_result))) {
+            throw ParseResultException::factory($parse_result);
+        }*/
+        $namespaceRow = [];
+        foreach ($parse_result as $row) {
+
+            if (!isset($row['type'])) continue;
+
+            if ($row['type'] === NamespaceElement::TYPE) {
+                $namespaceRow = $row;
+                break;
+            }
+        }
+
+        if (empty($namespaceRow)) {
             throw ParseResultException::factory($parse_result);
         }
 
-        $namespace = $this->makeNamespace(current($parse_result));
+        $namespace = $this->makeNamespace($namespaceRow);
         $comment = '';
 
         foreach ($parse_result as $row) {
